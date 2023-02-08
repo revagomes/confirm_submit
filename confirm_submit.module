@@ -1,0 +1,99 @@
+<?php
+
+/**
+ * @file
+ * Contains confirm_submit.module.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\ejp_content\ContentHandler;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_help().
+ */
+function confirm_submit_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the form_confirm_submit module.
+    case 'help.page.confirm_submit':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides a confirmation pop-up on forms.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form().
+ */
+function confirm_submit_form($node, $form) {
+  $msg = t('Do you want to submit this?');
+
+  $jscript = 'Drupal.behaviors.moduleName = function() {$("#confirm_submit").click(function(){return confirm("' . $msg . '")});}';
+
+  $form['#attached']['script'] = $jscript;
+
+  $form['submit'] = [
+    '#type' => 'submit',
+    '#id' => 'confirm_submit',
+    '#value' => t('Submit'),
+  ];
+
+  return $form;
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function confirm_submit_node_insert(NodeInterface $entity) {
+  return \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(ContentHandler::class)
+    ->nodeInsert($entity);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function confirm_submit_node_presave(EntityInterface $entity) {
+  return \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(ContentHandler::class)
+    ->nodePamPresave($entity);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function confirm_submit_node_update(NodeInterface $entity) {
+  return \Drupal::service('class_resolver')
+    ->getInstanceFromDefinition(ContentHandler::class)
+    ->nodeUpdate($entity);
+}
+
+/**
+ * Implements hook_entity_type_alter().
+ *
+ * Alters the entity definition and adds our own form handlers.
+ */
+function confirm_submit_entity_type_alter(array &$entity_types) {
+  $form_modes = \Drupal::service('entity_display.repository')
+    ->getAllFormModes();
+
+  foreach ($form_modes as $entity_type => $display_modes) {
+    if ($entity_type !== 'node') {
+      continue;
+    }
+
+    $type = $entity_types[$entity_type];
+    foreach ($display_modes as $machine_name => $form_display) {
+      if (!empty($form_display) && isset($type->getHandlerClasses()['form']['default'])) {
+        $handler_class = $type->getHandlerClasses()['form']['default'];
+        $type->setFormClass($machine_name, $handler_class);
+      }
+    }
+  }
+}

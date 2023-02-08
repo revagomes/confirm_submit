@@ -1,0 +1,5 @@
+name: 'Confirm Forms Submission'
+description: 'Provides a confirmation pop-up on forms.'
+type: module
+core_version_requirement: ^8 || ^9 || ^10
+package: 'Administration'

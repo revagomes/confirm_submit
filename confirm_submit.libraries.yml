@@ -1,0 +1,14 @@
+confirm-popup:
+  version: 1.x
+  js:
+    js/confirm-popup.js: {}
+  css:
+    theme:
+      css/confirm-popup.css: {}
+  dependencies:
+    - core/jquery
+    - core/once
+    - core/jquery.once.bc
+    - core/drupal
+    - core/drupal.dialog
+    - core/drupal.form

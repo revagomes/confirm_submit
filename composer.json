@@ -1,0 +1,7 @@
+{
+  "name": "drupal/confirm_submit",
+  "type": "drupal-module",
+  "description": "Provides a confirmation pop-up on forms.",
+  "keywords": [],
+  "minimum-stability": "dev",
+}
